@@ -6,7 +6,7 @@
     <title>Dashboard Pengajuan Fee</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyY7XHsNUXjGfuN4CU3TwgMkmNTcynhyI2nKf_zwFwDwIUYxLgkm3j4JKQeWfa3ZFfFZA/exec";
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwOWByRMVYrc7LoK5GfHeOiCJlbFTtlYJLO6ViOuLh4dLlBToAm2x9ajwZiCc2as1Z8-Q/exec";
         const GITHUB_UPLOAD_PAGE = "https://admin-hehe.github.io/upload-fee/";
 
         tailwind.config = {
@@ -125,6 +125,51 @@
             </div>
         </div>
     </div>
+    
+    <div id="adminModal" class="fixed inset-0 z-[110] hidden overflow-y-auto">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="closeAdminModal()"></div>
+        <div class="relative bg-white dark:bg-dark-card w-full max-w-md rounded-[2.5rem] shadow-2xl p-8 border border-slate-200 dark:border-slate-800">
+            <div class="flex justify-between items-start mb-6">
+                <div>
+                    <h4 id="modalId" class="text-2xl font-black text-indigo-600 font-mono tracking-tighter">FEE-XXXX</h4>
+                    <p id="modalKegiatan" class="text-sm font-bold text-slate-500">Detail Kegiatan</p>
+                </div>
+                <button onclick="closeAdminModal()" class="p-2 bg-slate-100 dark:bg-slate-800 rounded-full text-slate-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <form id="adminForm" class="space-y-5">
+                <input type="hidden" id="adminRecordId">
+                
+                <div>
+                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Update Status</label>
+                    <select id="adminStatus" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-3 px-4 font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500">
+                        <option value="Pending">Pending</option>
+                        <option value="Pengajuan">Pengajuan</option>
+                        <option value="Validate">Validate</option>
+                        <option value="Done">Done</option>
+                    </select>
+                </div>
+
+                <div>
+		    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tanggal Transfer</label>
+		    <input type="date" id="adminTglTf" class="w-full bg-slate-50 dark:bg-slate-800 border-none rounded-2xl py-3 px-4 font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-indigo-500">
+		</div>
+
+                <div class="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-2xl border border-dashed border-slate-300 dark:border-slate-700">
+                    <span class="text-sm font-bold text-slate-700 dark:text-slate-200">Bukti Transfer</span>
+                    <input type="checkbox" id="adminBuktiTf" class="w-6 h-6 rounded-lg border-none bg-slate-200 dark:bg-slate-700 text-indigo-600 focus:ring-0 cursor-pointer">
+                </div>
+
+                <button type="submit" id="saveAdminBtn" class="w-full bg-indigo-600 text-white font-black py-4 rounded-2xl shadow-lg shadow-indigo-500/30 active:scale-95 transition-all">
+                    SIMPAN PERUBAHAN
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
 
     <script>
         let allData = [];
@@ -175,14 +220,19 @@
             const end = start + rowsPerPage;
             
             filteredData.slice(start, end).forEach((item, i) => {
-                const row = tbody.insertRow();
-                row.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition row-animate';
+	    const row = tbody.insertRow();
+	    const statusColor = item.status === 'Done' ? 'text-emerald-500' : 'text-amber-500';
+	    row.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/40 transition cursor-pointer row-animate';
+	    row.onclick = () => openAdminModal(item);
                 row.style.animationDelay = `${i * 0.05}s`;
                 row.innerHTML = `
                     <td class="px-6 py-4 font-mono font-bold text-indigo-600 dark:text-indigo-400">${item.id}</td>
-                    <td class="px-6 py-4 font-semibold">${item.pic}</td>
-                    <td class="px-6 py-4 font-bold text-slate-800 dark:text-slate-100">${item.nama_kegiatan}</td>
-                    <td class="px-6 py-4 font-mono text-xs text-slate-400">${item.vendor}</td>
+                    <td class="px-6 py-4 font-semibold">
+			<span class="block">${item.pic}</span>
+			<span class="text-[9px] font-black uppercase ${statusColor}">● ${item.status || 'Pending'}</span>
+		    </td>
+                    <td class="px-6 py-4 font-semibold text-slate-800 dark:text-slate-100">${item.nama_kegiatan}</td>
+                    <td class="px-6 py-4 font-bold">${item.vendor}</td>
                     <td class="px-6 py-4 font-black text-emerald-600 dark:text-emerald-400">${item.harga}</td>
                     <td class="px-6 py-4">
                         ${item.link_dokumentasi ? 
@@ -216,7 +266,107 @@
             });
         }
 
+function openAdminModal(item) {
+    document.getElementById('modalId').textContent = item.id;
+    document.getElementById('modalKegiatan').textContent = item.nama_kegiatan;
+    document.getElementById('adminRecordId').value = item.id;
+    
+    // Set default value dari data yang ada
+    document.getElementById('adminStatus').value = item.status || 'Pending';
+    document.getElementById('adminTglTf').value = item.tgl_transfer || '';
+    document.getElementById('adminBuktiTf').checked = item.bukti_tf === "TERSEDIA";
+    
+    document.getElementById('adminModal').classList.remove('hidden');
+}
+
+function closeAdminModal() {
+    document.getElementById('adminModal').classList.add('hidden');
+}
+
+// HANDLE SUBMIT FORM ADMIN
+document.getElementById('adminForm').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('saveAdminBtn');
+    btn.disabled = true;
+    btn.textContent = "Menyimpan...";
+
+
+	const payload = {
+	    action: 'updateAdminStatus',
+	    record_id: document.getElementById('adminRecordId').value,
+	    status: document.getElementById('adminStatus').value,
+	    tgl_transfer: document.getElementById('adminTglTf').value, // akan "" jika kosong
+	    bukti_tf: document.getElementById('adminBuktiTf').checked // akan true/false (boolean)
+	};
+
+    try {
+    const res = await fetch(WEB_APP_URL, {
+        method: 'POST',
+        body: new URLSearchParams(payload)
+    });
+    const result = await res.json();
+    
+    if(result.result === 'success') {
+        closeAdminModal();
+        loadData();
+        // Toast Sukses
+    } else {
+        // INI PENTING: Kasih tau pesan error dari server
+        alert("Gagal: " + result.message);
+    }
+} catch (err) {
+    alert("Koneksi Gagal: " + err.toString());
+} finally {
+        btn.disabled = false;
+        btn.textContent = "SIMPAN PERUBAHAN";
+    }
+};
+
+function formatTgl(dateString) {
+    if (!dateString || dateString === "-") return "-";
+    try {
+        const d = new Date(dateString);
+        if (isNaN(d.getTime())) return dateString; // Balikin apa adanya kalo bukan date
+        return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    } catch (e) { return dateString; }
+}
+
+// Fungsi khusus buat ngisi input type="date" (butuh format YYYY-MM-DD)
+function formatForInputDate(dateString) {
+    if (!dateString) return "";
+    const d = new Date(dateString);
+    if (isNaN(d.getTime())) return "";
+    return d.toISOString().split('T')[0];
+}
+
+function openAdminModal(item) {
+    document.getElementById('modalId').textContent = item.id;
+    document.getElementById('modalKegiatan').textContent = item.nama_kegiatan;
+    document.getElementById('adminRecordId').value = item.id;
+    
+    document.getElementById('adminStatus').value = item.status || 'Pending';
+    
+    // Gunakan helper formatForInputDate agar muncul di input kalender
+    document.getElementById('adminTglTf').value = formatForInputDate(item.tgl_transfer);
+    
+    // Checkbox logic
+    document.getElementById('adminBuktiTf').checked = (item.bukti_tf === true || item.bukti_tf === "TRUE");
+    
+    document.getElementById('adminModal').classList.remove('hidden');
+}
         window.onload = loadData;
+        
+        // Listener untuk tombol keyboard
+document.addEventListener('keydown', function(event) {
+    // Cek apakah tombol yang ditekan adalah 'Escape'
+    if (event.key === 'Escape') {
+        // Cek dulu modalnya lagi kebuka atau nggak
+        const modal = document.getElementById('adminModal');
+        if (!modal.classList.contains('hidden')) {
+            closeAdminModal();
+        }
+    }
+});
     </script>
 </body>
 </html>
