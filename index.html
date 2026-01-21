@@ -240,7 +240,7 @@
                         `<span class="text-[10px] font-bold text-slate-400 italic tracking-wider">WAITING...</span>`}
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <button onclick="showToast('${item.id}')" class="bg-indigo-600 text-white text-[10px] font-black py-2 px-4 rounded-xl active:scale-95 shadow-md">LINK</button>
+                        <button onclick="showToast(event, '${item.id}')" class="bg-indigo-600 text-white text-[10px] font-black py-2 px-4 rounded-xl active:scale-95 shadow-md">LINK</button>
                     </td>
                 `;
             });
@@ -256,6 +256,8 @@
         }
 
         function showToast(id) {
+        if (event) event.stopPropagation();
+        
             const shareLink = `${GITHUB_UPLOAD_PAGE}?id=${id}`;
             navigator.clipboard.writeText(shareLink).then(() => {
                 const toast = document.getElementById('toast');
