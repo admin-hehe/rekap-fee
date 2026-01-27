@@ -7,7 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         // ISI URL WEB APP LO DISINI
-        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxsaqBNjU9gAoN51EJVfZ6oCf5ni1NzBWHRGI2S204Hna2t5HdiCNwxK_RWs1BmfGt2pw/exec"; 
+        const WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzpVz1VYlJ-JSAMSAxWJnm9Ovx_-c2Q-39PWBtABVXO24-v5tzDUcT_rdq9uigl0Zfj4w/exec"; 
         const GITHUB_UPLOAD_PAGE = "https://admin-hehe.github.io/upload-fee/";
 
         tailwind.config = {
@@ -287,13 +287,16 @@ function openAdminModal(id) {
     const data = allData.find(item => item.id === id);
     if (!data) return;
 
+    const tgl = (data.tanggal_task !== "-" && data.tanggal_task !== "" && data.advanced !== "NO") 
+    ? ` | <span class="text-amber-500 font-bold">${new Date(data.tanggal_task).toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</span>` 
+    : "";
     // Tampilkan Modal Langsung
     document.getElementById('adminModal').classList.remove('hidden');
 
     // Isi Info Detail (Kiri)
     document.getElementById('modalId').textContent = data.id;
     document.getElementById('modalPic').textContent = `PIC: ${data.pic}`;
-    document.getElementById('infoKegiatan').textContent = data.nama_kegiatan;
+    document.getElementById('infoKegiatan').innerHTML = `${data.nama_kegiatan}${tgl}`;
     document.getElementById('infoBrand').textContent = data.brand || '-';
     document.getElementById('infoVendor').textContent = data.vendor || '-';
     document.getElementById('infoKontak').textContent = `${data.email_vendor || ''} | ${data.telp_vendor || ''}`;
